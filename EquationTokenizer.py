@@ -2,6 +2,10 @@ import sympy as sp
 from sympy.core.numbers import Float
 from sympy.core.numbers import Integer
 from sympy.core.numbers import Rational
+import torch
+from torch.nn.utils.rnn import pad_sequence
+import torch.nn.functional as F
+
 
 class EquationTokenizer:
     """
@@ -115,16 +119,24 @@ class EquationTokenizer:
         """Takes in a sympy equation and outputs a tokenized list."""
         if self.tokenize is None:
             raise('Tokenizer not created yet.')
-        return self.tokenize(self.sympy_to_list(sympy_eq))
+        seq = self.tokenize(self.sympy_to_list(sympy_eq)) + [self.tokenize_dict['END']]
+        return seq
     
     def tokens_to_symp(self, tokens):
         """Takes in a sympy equation and outputs a tokenized list."""
         if self.tokenize is None:
             raise('Tokenizer not created yet.')
-        return self.list_to_sympy(self.decode(tokens))
+        decoded_seq = self.decode(tokens)
+        decoded_seq = [i for i in decoded_seq if i not in ['END','PAD']]
+        seq = self.list_to_sympy(self.decode(tokens))
+        return seq
 
     def create_tokenizer(self, symbol_set):
         """Takes a set of symbols and creates a tokenizer for them."""
+
+        #add the special tokens
+        symbol_set = symbol_set.union(set(['END','PAD']))
+
         tokenize_dict = {symbol:idx for symbol, idx in zip(list(symbol_set), range(len(symbol_set)))}
         decode_dict = {idx:symbol for symbol, idx in zip(list(symbol_set), range(len(symbol_set)))}
 
@@ -137,3 +149,13 @@ class EquationTokenizer:
 
         print(f'Created Tokenizer and Decoder for character set with size: {self.dict_size}')
 
+    def tensorize_and_pad(self, list_of_token_list):
+        """Takes in a list of tokenized lists and outputs a padded tensor of tensors."""
+    
+        pad_val = self.tokenize_dict['PAD']
+
+        list_of_token_list = [torch.tensor(i) for i in list_of_token_list]
+
+        output = pad_sequence(list_of_token_list, batch_first=True, padding_value=pad_val)
+        
+        return output
