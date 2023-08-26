@@ -1,6 +1,7 @@
 import sympy as sp
 from sympy.core.numbers import Float
 from sympy.core.numbers import Integer
+from sympy.core.numbers import Rational
 
 class EquationTokenizer:
     """
@@ -8,12 +9,17 @@ class EquationTokenizer:
     """
     def __init__(self):
         self.tokenizer_dict = {}
-        self.dict_size = None
+        self.dict_size = 0
+        self.tokenize = None
+        self.decode = None
+        self.tokenizer_dict = None
+        self.decode_dict = None
 
 
     def sympy_to_list(self, eq):
         """
         Converts a sympy equation to a list that will be tokenized.
+        This uses prefix notation.
         """
         eq_list = []
         eq_args = eq.args
@@ -26,7 +32,7 @@ class EquationTokenizer:
         for ind, arg in enumerate(eq_args):
             sub_arg_list = self.sympy_to_list(arg)
             for _sub in sub_arg_list:
-                if isinstance(_sub, Float) or isinstance(_sub, Integer): 
+                if isinstance(_sub, Float) or isinstance(_sub, Integer) or isinstance(_sub, Rational): 
                     #prehaps not general enough should allow for more types
                     #the idea is we want to tokenize '12.2' as '1','2,'.','2' and not '12.2'
                     for i in str(_sub):
@@ -83,7 +89,7 @@ class EquationTokenizer:
         Regroups numbers in a list to a their original glory.
         """
         final_list = []
-        numbers_list = ['0','1','2','3','4','5','6','7','8','9','.']
+        numbers_list = ['0','1','2','3','4','5','6','7','8','9','.','-','/']
         num_str = ''
         for idx, i in enumerate(eq_list):
             if i in numbers_list:
@@ -104,3 +110,30 @@ class EquationTokenizer:
         grouped_num_list = self._regroup_numbers(eq_list)
         parsed_list = self._parantheses_to_list(grouped_num_list)[0][0]
         return self._utils_exec_sympy(parsed_list)
+    
+    def sympy_to_tokens(self, sympy_eq):
+        """Takes in a sympy equation and outputs a tokenized list."""
+        if self.tokenize is None:
+            raise('Tokenizer not created yet.')
+        return self.tokenize(self.sympy_to_list(sympy_eq))
+    
+    def tokens_to_symp(self, tokens):
+        """Takes in a sympy equation and outputs a tokenized list."""
+        if self.tokenize is None:
+            raise('Tokenizer not created yet.')
+        return self.list_to_sympy(self.decode(tokens))
+
+    def create_tokenizer(self, symbol_set):
+        """Takes a set of symbols and creates a tokenizer for them."""
+        tokenize_dict = {symbol:idx for symbol, idx in zip(list(symbol_set), range(len(symbol_set)))}
+        decode_dict = {idx:symbol for symbol, idx in zip(list(symbol_set), range(len(symbol_set)))}
+
+        self.tokenize_dict = tokenize_dict
+        self.dict_size = len(tokenize_dict)
+        self.decode_dict = decode_dict
+
+        self.tokenize = lambda x: [self.tokenize_dict[i] for i in x]
+        self.decode = lambda x: [self.decode_dict[i] for i in x]
+
+        print(f'Created Tokenizer and Decoder for character set with size: {self.dict_size}')
+
