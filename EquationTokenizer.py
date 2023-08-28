@@ -72,7 +72,9 @@ class EquationTokenizer:
                 return final_list, idx+1
 
             elif i!=',':
-                if eq_list[idx+1] != '(':
+                if len(eq_list)==idx+1:
+                    final_list.append(i)
+                elif eq_list[idx+1] != '(':
                     final_list.append(i)
 
         return final_list, idx
@@ -101,6 +103,8 @@ class EquationTokenizer:
                 if eq_list[idx+1] not in numbers_list:
                     if '.' in num_str:
                         final_list.append(Float(num_str))
+                    elif '/' in num_str:
+                        final_list.append(Rational(num_str))
                     else:
                         final_list.append(Integer(num_str))
                     num_str = ''
@@ -122,7 +126,7 @@ class EquationTokenizer:
         seq = self.tokenize(self.sympy_to_list(sympy_eq)) + [self.tokenize_dict['END']]
         return seq
     
-    def tokens_to_symp(self, tokens):
+    def tokens_to_sympy(self, tokens):
         """Takes in a sympy equation and outputs a tokenized list."""
         if self.tokenize is None:
             raise('Tokenizer not created yet.')
@@ -144,7 +148,7 @@ class EquationTokenizer:
         self.dict_size = len(tokenize_dict)
         self.decode_dict = decode_dict
 
-        self.tokenize = lambda x: [self.tokenize_dict[i] for i in x]
+        self.tokenize = lambda x: [self.tokenize_dict[i] for i in x] + [self.tokenize_dict['END']]
         self.decode = lambda x: [self.decode_dict[i] for i in x]
 
         print(f'Created Tokenizer and Decoder for character set with size: {self.dict_size}')
@@ -157,5 +161,18 @@ class EquationTokenizer:
         list_of_token_list = [torch.tensor(i) for i in list_of_token_list]
 
         output = pad_sequence(list_of_token_list, batch_first=True, padding_value=pad_val)
-        
+
         return output
+    
+    def tensorize_and_pad_by_len(self, list_of_token_list, max_len):
+        """Takes in a list of tokenized lists and outputs a padded tensor of tensors of defined length."""
+    
+        pad_val = self.tokenize_dict['PAD']
+
+        list_of_token_list = [torch.tensor(i) for i in list_of_token_list]
+        _extra = torch.zeros(max_len)
+        list_of_token_list.append(_extra)
+
+        output = pad_sequence(list_of_token_list, batch_first=True, padding_value=pad_val)
+
+        return output[:-1]
