@@ -34,10 +34,10 @@ class DatasetTokenizer(EquationTokenizer):
         seq = self.tensorize_and_pad_by_len([seq], self.max_length)
         return seq
     
-    def split(self, N):
-        split_n = int(N*0.8)
+    def split(self, factor):
+        split_n = int(self.x_tokenized.shape[0]*factor)
 
-        self.x_train =  self.tokenized_x[:split_n]
-        self.y_train = self.tokenized_y[:split_n]
-        self.x_val = self.tokenized_x[split_n:]
-        self.y_val = self.tokenized_y[split_n:]
+        self.x_train =  self.x_tokenized[:split_n]
+        self.y_train = self.y_tokenized[:split_n]
+        self.x_val = self.x_tokenized[split_n:]
+        self.y_val = self.y_tokenized[split_n:]

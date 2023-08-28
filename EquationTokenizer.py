@@ -127,7 +127,7 @@ class EquationTokenizer:
         return seq
     
     def tokens_to_sympy(self, tokens):
-        """Takes in a sympy equation and outputs a tokenized list."""
+        """Takes in a tokenized list and outputs a sympy equation."""
         if self.tokenize is None:
             raise('Tokenizer not created yet.')
         decoded_seq = self.decode(tokens)
