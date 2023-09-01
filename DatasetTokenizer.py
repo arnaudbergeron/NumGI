@@ -28,7 +28,7 @@ class DatasetTokenizer(EquationTokenizer):
         seq = self.sympy_to_list(eq)
 
         if set(seq) - self.char_set != set():
-            raise('The equation contains characters not in the character set. The models output will be non-sensical.')
+            raise Exception(f'The equation contains characters not in the character set. The models output will be non-sensical. Remove characters: {(set(seq) - self.char_set)}')
         
         seq = self.tokenize(seq)
         seq = self.tensorize_and_pad_by_len([seq], self.max_length)

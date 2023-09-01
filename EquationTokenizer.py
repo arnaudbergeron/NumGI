@@ -9,7 +9,10 @@ import torch.nn.functional as F
 
 class EquationTokenizer:
     """
-    Tokenizer for equations.
+    Tokenizer for equations. 
+    Given a set of equations it creates a tokenizer and decoder for their unique symbols.
+    This will allow us to parse equations as sequences of tokens.
+    These tokens can now be processed by the transformer.
     """
     def __init__(self):
         self.tokenizer_dict = {}
@@ -20,18 +23,25 @@ class EquationTokenizer:
         self.decode_dict = None
 
 
-    def sympy_to_list(self, eq):
+    def sympy_to_list(self, sympy_equation) -> list:
         """
         Converts a sympy equation to a list that will be tokenized.
-        This uses prefix notation.
+        This uses prefix notation. of the form: [function1(arg1, function2(arg2_1, arg2_2), ...)],
+        Where args can be functions with their own arguments.
+
+        Args:
+            sympy_equation: Sympy object/equation.
+
+        Returns:
+            list: Sympy equation transformed to a list format.
         """
         eq_list = []
-        eq_args = eq.args
+        eq_args = sympy_equation.args
         args_len = len(eq_args)
         if args_len == 0:
-            return [eq]
+            return [sympy_equation]
             
-        eq_list.append(eq.func)
+        eq_list.append(sympy_equation.func)
         eq_list.append('(')
         for ind, arg in enumerate(eq_args):
             sub_arg_list = self.sympy_to_list(arg)
@@ -53,7 +63,8 @@ class EquationTokenizer:
 
     def _parantheses_to_list(self, eq_list):
         """
-        Converts a list with parantheses to a list of lists according to parentheses this is a util func.
+        Converts a list with parantheses to a list of lists according to parentheses.
+        This is a util func.
         """
         final_list = []
         
@@ -80,6 +91,11 @@ class EquationTokenizer:
         return final_list, idx
     
     def _utils_exec_sympy(self, eq_list):
+        """
+        This takes in a graph in the shape of lists of lists and converts it to a sympy equation.
+        Using a kind of AST. 
+        This is a util func.
+        """
         function = eq_list[0]
         args_list = []
         for i in eq_list[1:]:
@@ -92,7 +108,9 @@ class EquationTokenizer:
     
     def _regroup_numbers(self, eq_list):
         """
-        Regroups numbers in a list to a their original glory.
+        Regroups numbers in a list to a their original glory. 
+        We had seperated them to tokenize them but we now put them back together.
+        This is the first step of going from list to sympy.
         """
         final_list = []
         numbers_list = ['0','1','2','3','4','5','6','7','8','9','.','-','/']
@@ -114,7 +132,11 @@ class EquationTokenizer:
         return final_list
 
     def list_to_sympy(self, eq_list):
-        """This function takes in a list of functions and numbers and outputs the sympy equation."""
+        """
+        This function takes in a list of functions and numbers and outputs the sympy equation.
+        To go from list/sequence to sympy equation we need to construct the AST again.
+        We do so by regrouping functions and their arguments.
+        """
         grouped_num_list = self._regroup_numbers(eq_list)
         parsed_list = self._parantheses_to_list(grouped_num_list)[0][0]
         return self._utils_exec_sympy(parsed_list)
@@ -131,15 +153,15 @@ class EquationTokenizer:
         if self.tokenize is None:
             raise('Tokenizer not created yet.')
         decoded_seq = self.decode(tokens)
-        decoded_seq = [i for i in decoded_seq if i not in ['END','PAD']]
-        seq = self.list_to_sympy(self.decode(tokens))
+        decoded_seq = [i for i in decoded_seq if i not in ['START','END','PAD']]
+        seq = self.list_to_sympy(decoded_seq)
         return seq
 
     def create_tokenizer(self, symbol_set):
         """Takes a set of symbols and creates a tokenizer for them."""
 
         #add the special tokens
-        symbol_set = symbol_set.union(set(['END','PAD']))
+        symbol_set = symbol_set.union(set(['START','END','PAD']))
 
         tokenize_dict = {symbol:idx for symbol, idx in zip(list(symbol_set), range(len(symbol_set)))}
         decode_dict = {idx:symbol for symbol, idx in zip(list(symbol_set), range(len(symbol_set)))}
@@ -148,7 +170,7 @@ class EquationTokenizer:
         self.dict_size = len(tokenize_dict)
         self.decode_dict = decode_dict
 
-        self.tokenize = lambda x: [self.tokenize_dict[i] for i in x] + [self.tokenize_dict['END']]
+        self.tokenize = lambda x: [self.tokenize_dict['START']] + [self.tokenize_dict[i] for i in x] + [self.tokenize_dict['END']]
         self.decode = lambda x: [self.decode_dict[i] for i in x]
 
         print(f'Created Tokenizer and Decoder for character set with size: {self.dict_size}')
