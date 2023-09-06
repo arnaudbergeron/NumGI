@@ -14,7 +14,7 @@ class EquationTokenizer:
     This will allow us to parse equations as sequences of tokens.
     These tokens can now be processed by the transformer.
     """
-    def __init__(self):
+    def __init__(self, useDefaultTokenizer = False):
         self.tokenizer_dict = {}
         self.dict_size = 0
         self.tokenize = None
