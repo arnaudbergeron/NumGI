@@ -1,6 +1,6 @@
 import sympy as sp
 import random
-
+import numba
 
 
 class EquationCreator:
@@ -21,7 +21,7 @@ class EquationCreator:
             sp.acoth, sp.asech, sp.acsch
         ]
 
-
+    @numba.jit()
     def generate_random_function(self):
         #Generate a random function that will be the solution to the DE
 
@@ -39,11 +39,15 @@ class EquationCreator:
         function = function**exponent
 
         # Generate a random coefficient for the function
-        coefficient = random.randint(1, 10)
+        coefficient_p = random.randint(1, 10)
+        coefficient_q = random.randint(1, 10)
+        coefficient = sp.Rational(coefficient_p, coefficient_q)
+
         function = coefficient * function
 
         return function
-
+    
+    @numba.jit()
     def generate_random_differential_equation(self, function, num_op = 3):
         # Generate a random differential equation with solution: function
 

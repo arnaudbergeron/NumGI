@@ -150,12 +150,16 @@ class EquationTokenizer:
     
     def tokens_to_sympy(self, tokens):
         """Takes in a tokenized list and outputs a sympy equation."""
+        decoded_seq = self.tokens_to_list(tokens)
+        seq = self.list_to_sympy(decoded_seq)
+        return seq
+    
+    def tokens_to_list(self, tokens):
         if self.tokenize is None:
             raise('Tokenizer not created yet.')
         decoded_seq = self.decode(tokens)
         decoded_seq = [i for i in decoded_seq if i not in ['START','END','PAD']]
-        seq = self.list_to_sympy(decoded_seq)
-        return seq
+        return decoded_seq
 
     def create_tokenizer(self, symbol_set):
         """Takes a set of symbols and creates a tokenizer for them."""
@@ -198,3 +202,22 @@ class EquationTokenizer:
         output = pad_sequence(list_of_token_list, batch_first=True, padding_value=pad_val)
 
         return output[:-1]
+
+def defaultTokenizer():
+    """Returns a default tokenizer. Because of issues with pickling."""
+    tokenize_dict = {')': 0, sp.acsc: 1, sp.acot: 2, sp.asech: 3, sp.core.containers.Tuple: 4,'/': 5, sp.sech: 6,
+    'END': 7, sp.exp: 8, '7': 9, '0': 10, sp.asin: 11, '5': 12, sp.core.function.Derivative: 13,
+    '8': 14, sp.asec: 15, sp.core.add.Add: 16, sp.core.power.Pow: 17, sp.csch: 18, 'START': 19, sp.csc: 20, 'PAD': 21, sp.sin: 22,
+    ',': 23, sp.acsch: 24, sp.core.relational.Equality: 25, '(': 26, '2': 27, sp.Symbol('x'): 28, sp.coth: 29, sp.Symbol('y'): 30, sp.log: 31, sp.cos: 32,
+    '6': 33, sp.core.mul.Mul: 34, sp.acos: 35, '9': 36, sp.Function('f'): 37, '-': 38, sp.sqrt: 39, sp.cosh: 40, sp.tan: 41, sp.tanh: 42, sp.Symbol('z'): 43,
+    '4': 44, '3': 45, sp.cot: 46, sp.asinh: 47, sp.atan: 48, sp.acosh: 49, '1': 50, sp.atanh: 51, '.': 52, sp.sinh: 53, sp.acoth: 54, sp.sec: 55}
+    
+    #invert tokenizer_dict into decode_dict
+    decode_dict = {v: k for k, v in tokenize_dict.items()}
+
+    tokenize = lambda x: [tokenize_dict['START']] + [tokenize_dict[i] for i in x] + [tokenize_dict['END']]
+    decode = lambda x: [decode_dict[i] for i in x]
+
+    dict_size = len(tokenize_dict)
+
+    return tokenize_dict, decode_dict, tokenize, decode
