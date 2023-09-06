@@ -10,7 +10,7 @@ requires-python = ">=3.8"
 license = { file = "LICENSE.txt" }
 authors = [{ name = "Arnaud Bergeron", email = "bergerona62@gmail.com" }]
 dynamic = ["version"]
-dependencies = ["sympy", "torch", "NumGI"]
+dependencies = ["sympy", "torch", "NumGI", "Numba"]
 
 [project.optional-dependencies]
 doc = [
