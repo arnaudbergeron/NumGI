@@ -1,2 +1,4 @@
 archive
 *.pt
+.DS_Store
+*.ipynb
