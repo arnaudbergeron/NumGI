@@ -221,6 +221,3 @@ def defaultTokenizer():
     dict_size = len(tokenize_dict)
 
     return tokenize_dict, decode_dict, tokenize, decode
-
-def do_something(self):
-    print("somthing")
