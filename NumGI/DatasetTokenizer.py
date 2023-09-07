@@ -1,21 +1,19 @@
 from EquationTokenizer import EquationTokenizer, defaultTokenizer
 
 class DatasetTokenizer(EquationTokenizer):
-    def __init__(self, x, y, char_set_=None):
+    def __init__(self, x, y, useDefaultTokenizer=False):
         self.x = x
         self.y = y
         super().__init__()
-        if char_set_ is None:
-            self.char_set = self.create_set_char()
-        else:
-            self.char_set = char_set_
-
-        if self.char_set <= set(defaultTokenizer()[0].keys()):
+        
+        if useDefaultTokenizer:
             print('Using default tokenizer.')
             self.tokenize_dict, self.decode_dict, self.tokenize, self.decode = defaultTokenizer()
             self.dict_size = len(self.tokenize_dict)
+            self.char_set = set(self.tokenize_dict.keys())
 
         else:
+            self.char_set = self.create_set_char()
             self.create_tokenizer(self.char_set)
 
         self.x_tokenized = [self.tokenize(i) for i in self.x]
