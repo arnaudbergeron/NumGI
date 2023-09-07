@@ -7,20 +7,10 @@ name = "NumGI"
 description = "Differential equation solver."
 readme = "README.md"
 requires-python = ">=3.8"
-license = { file = "LICENSE.txt" }
 authors = [{ name = "Arnaud Bergeron", email = "bergerona62@gmail.com" }]
 dynamic = ["version"]
-dependencies = ["sympy", "torch", "NumGI", "Numba"]
+dependencies = ["sympy", "torch", "Numba"]
 
-[project.optional-dependencies]
-doc = [
-  "sphinx",
-  "sphinx-argparse",
-  "sphinx-copybutton",
-  "sphinx_rtd_theme",
-  "myst-parser",
-  "rstcheck",
-]
 
 
 
