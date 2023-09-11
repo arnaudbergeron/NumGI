@@ -44,7 +44,7 @@ Push your changes to your forked repository.
 Submit a pull request to the main repository.
 
 # License
-NumGI is released under the MIT License.
+NumGI is released under the GPL License.
 If your project uses NumGI, please cite it as follows:
 ```
 @inproceedings{
