@@ -30,7 +30,7 @@ The solution will be displayed in a graph, and additional details will be provid
 
 You can experiment with different equations and conditions by modifying the input fields.
 
-Contributing
+# Contributing
 Contributions to NumGI are welcome! If you would like to contribute to the project, please follow these steps:
 
 Fork the repository on GitHub.
