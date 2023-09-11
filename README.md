@@ -1,4 +1,4 @@
-![logo_banner](https://github.com/arnaudbergeron/NumGI/assets/58529583/696803b9-5f00-4d8a-b8e6-2d4cdaa93145)
+![logo_banner](https://github.com/arnaudbergeron/NumGI/assets/58529583/82c77afb-6667-4af3-9d7c-54a07bd10b8a)
 
 -----------------
 
