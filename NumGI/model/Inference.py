@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import torch
 
+from NumGI.EquationTokenizer import EquationTokenizer
+
 
 def batch_inference(
-    input_seqs: torch.tensor, model: torch.nn, start_id: int, pad_id: int, end_id: int
+    input_seqs: torch.tensor, model: torch.nn, tokenize_dict: EquationTokenizer
 ) -> torch.tensor:
     """Performs Batch Inference on a list of input sequences.
 
@@ -18,8 +20,10 @@ def batch_inference(
     Returns:
         torch.tensor: Output Solution(s) to solved by the model
     """
-    model = model.to("cpu")
-    model.tgt_mask = model.tgt_mask.to("cpu")
+    start_id = tokenize_dict["START"]
+    pad_id = tokenize_dict["PAD"]
+    end_id = tokenize_dict["END"]
+
     model.eval()
     with torch.no_grad():
         mask_in = input_seqs == pad_id
