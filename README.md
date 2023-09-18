@@ -1,4 +1,4 @@
-![logo_banner](https://github.com/arnaudbergeron/NumGI/assets/58529583/5c9582ca-333e-4476-96a5-bace02736606)
+![logo_banner](https://github.com/arnaudbergeron/NumGI/assets/58529583/4b700c9f-b58f-4448-af5d-50b637cd9d86)
 
 -----------------
 # NumGI - Differential Equation Solver using Transformer-based AI
