@@ -2,3 +2,4 @@
 archive
 NumgGI/_version.py
 *.ipynb
+.DS_Store
