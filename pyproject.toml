@@ -1,38 +1,20 @@
-[build-system]
-requires = ["hatchling", "hatch-vcs"]
-build-backend = "hatchling.build"
-
-[project]
-name = "NumGI"
-description = "Differential equation solver."
+[tool.poetry]
+name = "numgi"
+version = "0.1.0"
+description = "NumGI - Differential Equation Solver using Transformer-based AI"
+authors = ["Your Name <you@example.com>"]
+license = "GPL 3.0"
 readme = "README.md"
-requires-python = ">=3.8"
-authors = [{ name = "Arnaud Bergeron", email = "bergerona62@gmail.com" }]
-dynamic = ["version"]
-dependencies = ["sympy", "torch", "Numba", "pytest", "coverage"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pandas = "^2.1.0"
+sympy = "^1.12"
+pytest = "^7.4.2"
+torch = "^2.0.1"
+coverage = "^7.3.1"
 
 
-
-
-[tool.hatch.build.targets.wheel]
-packages = ["NumGI"]
-
-[tool.hatch.version]
-source = "vcs"
-
-[tool.hatch.build.hooks.vcs]
-version-file = "NumGI/_version.py"
-
-[tool.pytest.ini_options]
-addopts = "-ra -vv"
-
-[tool.coverage.run]
-branch = true
-source = ["NumGI/"]
-
-
-[tool.codespell]
-skip = "./.git,.mypy_cache,env,venv,tests,*bval,*bvec"
-
-[tool.black]
-line-length = 100
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
