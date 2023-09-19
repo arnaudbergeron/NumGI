@@ -10,7 +10,7 @@ docstring-convention = numpy
 max-line-length = 100
 max_complexity = 15
 max_function_length = 100
-ignore = D100, D102, D103, D104, W503, D407, D401, D406
+ignore = D100, D102, D103, D104, W503, D407, D401, D406, E731
 # for compatibility with black
 # https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#flake8
 extend-ignore = E203
