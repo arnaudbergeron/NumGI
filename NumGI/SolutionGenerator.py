@@ -51,6 +51,9 @@ class SolutionGenerator:
                 elif op[1] == "integration":
                     var = self.choose_variable(new_vars, used_vars)
                     f1 = sp.Integral(f1, var)
+                elif op[1] == "exponent":
+                    exp = random.randint(1, 10)
+                    f1 = sp.Pow(f1, exp)
         return f1
 
     def arithmetic_handler(self, operation: str, f1, f2):
@@ -90,7 +93,10 @@ class SolutionGenerator:
         self,
         operations: list | None,
     ):
-        """From list of operations returns a sympy operation object and identifier."""
+        """From list of operations returns a sympy operation object and identifier.
+
+        TODO: Add probabilities for when to choose which operation.
+        """
         return (
             random.choice(operations) if operations is not None else random.choice(self.OPERATIONS)
         )
@@ -136,6 +142,7 @@ class SolutionGenerator:
         ("division", "arithmetic"),
         ("differential", "differential"),
         ("integration", "integration"),
+        ("exponent", "exponent"),
     ]
     VARIABLES = ["x", "y", "z", "beta", "gamma"]
 
@@ -144,7 +151,7 @@ if __name__ == "__main__":
     sg = SolutionGenerator()
     eqs = sg.generate_solution_dataset(
         min_ops=2,
-        max_ops=3,
+        max_ops=7,
         num_eqs=4,
         vars=sg.VARIABLES,
         funcs=sg.DIFFERENTIAL_FUNCTIONS,
