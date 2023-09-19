@@ -6,17 +6,14 @@ from NumGI.DatasetTokenizer import DatasetTokenizer
 
 
 class LoadTokenizer(DatasetTokenizer):
-    """The tokenizer used when loading data from files.
-
-    Args:
-        DatasetTokenizer (_type_): _description_
-    """
+    """The tokenizer used when loading data from files."""
 
     def __init__(self, x_files, y_files):
         default_tokenized_x = []
         default_tokenized_y = []
 
-        tempTokenizer = DatasetTokenizer([["1", "2"]], [["1", "2"]], True)
+        temp_data = [["1", "2"]]
+        tempTokenizer = DatasetTokenizer(temp_data, temp_data, True)
 
         # load files
         max_length = 0

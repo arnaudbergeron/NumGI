@@ -9,7 +9,16 @@ from NumGI.EquationTokenizer import EquationTokenizer
 class DatasetTokenizer(EquationTokenizer):
     """Class for tokenizing a dataset."""
 
-    def __init__(self, x, y, useDefaultTokenizer=False):
+    def __init__(self, x: list, y: list, useDefaultTokenizer=False, isSympy=False):
+        """Creates a DatasetTokenizer object. Which holds your tokenizer and data.
+
+        Args:
+            x (list): Either a list of sympy equations or a list of sympy_to_list equations.
+            y (list): Either a list of sympy solutions or a list of sympy_to_list solutions
+            useDefaultTokenizer (bool, optional): If you want to use the default tokenizer.
+              Normally used when creating a Dataset that you wish to save.
+              Defaults to False.
+        """
         super().__init__()
 
         # shuffle lists
@@ -18,8 +27,13 @@ class DatasetTokenizer(EquationTokenizer):
         x, y = zip(*temp)
         x, y = list(x), list(y)
 
-        self.x = [self.sympy_to_list(i) for i in x]
-        self.y = [self.sympy_to_list(i) for i in y]
+        if isinstance(x[0], list):
+            self.x = x
+            self.y = y
+
+        else:
+            self.x = [self.sympy_to_list(i) for i in x]
+            self.y = [self.sympy_to_list(i) for i in y]
 
         if useDefaultTokenizer:
             print("Using default tokenizer.")
