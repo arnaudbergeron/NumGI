@@ -6,17 +6,14 @@ from NumGI.DatasetTokenizer import DatasetTokenizer
 
 
 class LoadTokenizer(DatasetTokenizer):
-    """The tokenizer used when loading data from files.
-
-    Args:
-        DatasetTokenizer (_type_): _description_
-    """
+    """The tokenizer used when loading data from files."""
 
     def __init__(self, x_files, y_files):
         default_tokenized_x = []
         default_tokenized_y = []
 
-        tempTokenizer = DatasetTokenizer([["1", "2"]], [["1", "2"]], True)
+        temp_data = [["1", "2"]]
+        tempTokenizer = DatasetTokenizer(temp_data, temp_data, True)
 
         # load files
         max_length = 0
@@ -33,7 +30,7 @@ class LoadTokenizer(DatasetTokenizer):
             default_tokenized_y[idx] = tempTokenizer.tensorize_and_pad_by_len(y, max_length)
 
         default_combined_x_torch = torch.cat(default_tokenized_x, axis=0)
-        default_combined_y_torch = torch.cat(default_tokenized_x, axis=0)
+        default_combined_y_torch = torch.cat(default_tokenized_y, axis=0)
 
         new_x = [tempTokenizer.tokens_to_list(i) for i in default_combined_x_torch.tolist()]
         new_y = [tempTokenizer.tokens_to_list(i) for i in default_combined_y_torch.tolist()]
