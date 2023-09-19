@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import random
+
 from NumGI.EquationTokenizer import defaultTokenizer
 from NumGI.EquationTokenizer import EquationTokenizer
 
@@ -8,9 +10,16 @@ class DatasetTokenizer(EquationTokenizer):
     """Class for tokenizing a dataset."""
 
     def __init__(self, x, y, useDefaultTokenizer=False):
-        self.x = x
-        self.y = y
         super().__init__()
+
+        # shuffle lists
+        temp = list(zip(x, y))
+        random.shuffle(temp)
+        x, y = zip(*temp)
+        x, y = list(x), list(y)
+
+        self.x = [self.sympy_to_list(i) for i in x]
+        self.y = [self.sympy_to_list(i) for i in y]
 
         if useDefaultTokenizer:
             print("Using default tokenizer.")
