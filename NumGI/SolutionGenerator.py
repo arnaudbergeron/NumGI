@@ -136,18 +136,18 @@ class SolutionGenerator:
             )
         elif node.op[1] == "differential":
             return sp.Derivative(
-                self.tree_to_eq_helper(node.left, sol, used_vars),
                 self.tree_to_eq_helper(node.right, sol, used_vars),
+                self.tree_to_eq_helper(node.left, sol, used_vars),
             )
         elif node.op[1] == "integration":
             return sp.Integral(
-                self.tree_to_eq_helper(node.left, sol, used_vars),
                 self.tree_to_eq_helper(node.right, sol, used_vars),
+                self.tree_to_eq_helper(node.left, sol, used_vars),
             )
         elif node.op[1] == "exponent":
             return sp.Pow(
-                self.tree_to_eq_helper(node.left, sol, used_vars),
                 self.tree_to_eq_helper(node.right, sol, used_vars),
+                self.tree_to_eq_helper(node.left, sol, used_vars),
             )
         elif node.op[1] == "symbol":
             return self.choose_used_variable(used_vars)
@@ -158,16 +158,31 @@ class SolutionGenerator:
 
     def generate_equation_tree(self, num_ops: int, ops: list):
         tree = self.EquationTree(self.EquationTree.Node(("function", "function"), None, None, 0))
+        levels = 0
         for i in range(num_ops):
             if i >= num_ops - 1:
                 op = self.choose_op_noarithmetic(ops)
             else:
                 op = self.choose_operation(ops)
-            level = random.randint(0, tree.level)
+            level = random.randint(0, levels)
             old_node = random.choice(tree.get_nodes_at_level(level))
-            new_node = self.EquationTree.Node(op, None, None, level)
-            tree.insert(old_node, new_node)
+            node_right = self.EquationTree.Node(op, None, None, level)
+            node_left = self.create_node_from_op(op, None, None, level)
+            new_level = tree.insert(old_node, node_right, node_left)
+            levels = max(levels, new_level)
         return tree
+
+    def create_node_from_op(self, op: tuple, left, right, level: int):
+        if op[1] == "differential":
+            placeholder = ("symbol", "symbol")
+        elif op[1] == "integration":
+            placeholder = ("symbol", "symbol")
+        elif op[1] == "exponent":
+            placeholder = ("number", "number")
+        elif op[1] == "arithmetic":
+            placeholder = ("operation", "undefined")
+
+        return self.EquationTree.Node(placeholder, left, right, level)
 
     class EquationTree:
         """Tree structure for equations."""
@@ -183,41 +198,30 @@ class SolutionGenerator:
             nodes_at_level = []
             while q:
                 node, lvl = q.pop(0)
-            if lvl == level:
-                # TODO: add dummy values so that symbols can be recognized
-                nodes_at_level.append(node) if node.op[1] != "symbol" or node.op[
-                    1
-                ] != "number" else None
-            elif node.left:
-                q.append((node.left, node.left.level))
-            elif node.right:
-                q.append((node.right, node.right.level))
+                if lvl == level:
+                    # TODO: add dummy values so that symbols can be recognized
+                    if node.op[1] != "number":
+                        nodes_at_level.append(node)
+                    else:
+                        print(node.op)
 
-            return nodes_at_level
+                if lvl > level:
+                    return nodes_at_level
+                if node.left:
+                    q.append((node.left, node.left.level))
+                if node.right:
+                    q.append((node.right, node.right.level))
+            if len(nodes_at_level) > 0:
+                return nodes_at_level
+            else:
+                print()
 
-        def insert(self, old_node: Node, new_node: Node):
-            old = old_node
-            old_node = new_node
-            old_node.right = old
-            self.update_level(old_node.right)
-            if new_node.op[1] == "differential":
-                old_node.left = self.Node(("symbol", "symbol"), None, None, old_node.level + 1)
-            elif new_node.op[1] == "integration":
-                old_node.left = self.Node(("symbol", "symbol"), None, None, old_node.level + 1)
-            elif new_node.op[1] == "exponent":
-                old_node.left = self.Node(("number", "number"), None, None, old_node.level + 1)
-            elif new_node.op[1] == "arithmetic":
-                old_node.left = self.Node(
-                    ("operation", "undefined"), None, None, old_node.level + 1
-                )
-
-        def update_level(self, node: Node):
-            node.level += 1
-            self.level = max(self.level, node.level)
-            if node.left:
-                self.update_level(node.left)
-            if node.right:
-                self.update_level(node.right)
+        def insert(self, node_old, node_right: Node, node_left: Node):
+            level = node_old.insert(node_right, node_left)
+            self.level = max(self.level, level)
+            if node_right.level == 0:
+                self.root = node_right
+            return self.level
 
         class Node:
             """Node for equation tree."""
@@ -233,6 +237,36 @@ class SolutionGenerator:
                 self.left = left
                 self.right = right
                 self.level = level
+
+            def insert(self, node_right, node_left):
+                old = self
+                self = node_right
+
+                if self.right is None:
+                    # self.right = old
+                    # lvl_right = self.right.update_level(self.level + 1)
+                    lvl_right = self.right.insert(old, None)
+                else:
+                    old.level += self.level + 1
+                    lvl_right = self.right.insert(old, None)
+                if self.left is None:
+                    # self.left = node_left
+                    #  lvl_left = self.left.update_level(self.level + 1)
+                    lvl_left = self.left.insert(node_left, None)
+                else:
+                    node_left.level += self.level + 1
+                    lvl_left = self.left.insert(node_left, None)
+                return max(lvl_left, lvl_right)
+
+            def update_level(self, level: int) -> int:
+                self.level = level
+                lvl_left = 0
+                lvl_right = 0
+                if self.left:
+                    lvl_left = self.left.update_level(level + 1)
+                if self.right:
+                    lvl_right = self.right.update_level(level + 1)
+                return max(self.level, max(lvl_left, lvl_right))
 
     def choose_op_noarithmetic(self, ops: list):
         return random.choice(ops[3:])
@@ -280,7 +314,6 @@ class SolutionGenerator:
     VARIABLES = ["x", "y", "z", "beta", "gamma"]
 
 
-6
 if __name__ == "__main__":
     sg = SolutionGenerator()
     eqs = sg.generate_solution_dataset(
