@@ -123,9 +123,12 @@ class SolutionGenerator:
 
         vars = [sp.Symbol(var) for var in used_vars]
         func = sp.Function("f")(*vars)
-        expression = self.tree_to_eq_helper(root, sol, used_vars)
-        equation = sp.Eq(expression, expression.doit())
-        equation.replace(expression, func)
+        try:
+            expression = self.tree_to_eq_helper(root, sol, used_vars)
+            equation = sp.Eq(expression, expression.doit())
+            equation.replace(expression, func)
+        except ValueError:
+            print(expression)
         return equation
 
     def tree_to_eq_helper(self, node: EquationTree.Node, sol, used_vars: list):
@@ -201,7 +204,7 @@ class SolutionGenerator:
                 node, lvl = q.pop(0)
                 if lvl == level:
                     # TODO: add dummy values so that symbols can be recognized
-                    if node.op[1] != "number":
+                    if node.op[1] != "number" and node.op[1] != "symbol":
                         nodes_at_level.append(node)
                     else:
                         print(node.op)
@@ -327,7 +330,7 @@ class SolutionGenerator:
         ("subtraction", "arithmetic"),
         ("division", "arithmetic"),
         ("differential", "differential"),
-        # ("integration", "integration"),
+        ("integration", "integration"),
         ("exponent", "exponent"),
     ]
     VARIABLES = ["x", "y", "z", "beta", "gamma"]
@@ -338,7 +341,7 @@ if __name__ == "__main__":
     eqs = sg.generate_solution_dataset(
         ops_sol=(3, 5),
         ops_eq=(2, 5),
-        num_eqs=2,
+        num_eqs=10,
         vars=sg.VARIABLES,
         funcs=sg.DIFFERENTIAL_FUNCTIONS,
         ops=sg.OPERATIONS,
