@@ -29,6 +29,7 @@ class SolutionGenerator:
                 sol, used_vars = self.generate_solution(i, vars, funcs, ops)
                 equation = self.generate_equation(used_vars, ops_eq, ops, sol)
                 dataset.append((sol, equation))
+        return dataset
 
     def generate_equation(self, used_vars, ops_eqs, ops, sol):
         """Generate an equation from a solution."""
@@ -166,9 +167,9 @@ class SolutionGenerator:
                 op = self.choose_operation(ops)
             level = random.randint(0, levels)
             old_node = random.choice(tree.get_nodes_at_level(level))
-            node_right = self.EquationTree.Node(op, None, None, level)
+            new_node = self.EquationTree.Node(op, None, None, level)
             node_left = self.create_node_from_op(op, None, None, level)
-            new_level = tree.insert(old_node, node_right, node_left)
+            new_level = tree.insert(old_node, new_node, node_left)
             levels = max(levels, new_level)
         return tree
 
@@ -216,11 +217,11 @@ class SolutionGenerator:
             else:
                 print()
 
-        def insert(self, node_old, node_right: Node, node_left: Node):
-            level = node_old.insert(node_right, node_left)
+        def insert(self, node_old, node_new: Node, node_left: Node):
+            level = node_old.insert(node_new, node_left)
             self.level = max(self.level, level)
-            if node_right.level == 0:
-                self.root = node_right
+            if node_new.level == 0:
+                self.root = node_new
             return self.level
 
         class Node:
@@ -237,26 +238,30 @@ class SolutionGenerator:
                 self.left = left
                 self.right = right
                 self.level = level
+                self.parent = None
+                self.is_left_child = None
 
-            def insert(self, node_right, node_left):
-                old = self
-                self = node_right
+            def insert(self, node_new, node_left):
+                node_new.right = self
+                if self.parent is not None:
+                    if self.is_left_child:
+                        self.parent.left = node_new
+                        node_new.is_left_child = True
+                    else:
+                        self.parent.right = node_new
+                        node_new.is_left_child = False
 
-                if self.right is None:
-                    # self.right = old
-                    # lvl_right = self.right.update_level(self.level + 1)
-                    lvl_right = self.right.insert(old, None)
-                else:
-                    old.level += self.level + 1
-                    lvl_right = self.right.insert(old, None)
-                if self.left is None:
-                    # self.left = node_left
-                    #  lvl_left = self.left.update_level(self.level + 1)
-                    lvl_left = self.left.insert(node_left, None)
-                else:
-                    node_left.level += self.level + 1
-                    lvl_left = self.left.insert(node_left, None)
-                return max(lvl_left, lvl_right)
+                node_new.right.parent = node_new
+                node_new.right.is_left_child = False
+                right_level = node_new.right.update_level(node_new.level + 1)
+
+                node_new.left = node_left
+                node_new.left.parent = node_new
+                node_new.left.is_left_child = True
+
+                left_level = node_new.left.update_level(node_new.level + 1)
+
+                return max(left_level, right_level)
 
             def update_level(self, level: int) -> int:
                 self.level = level
@@ -308,7 +313,7 @@ class SolutionGenerator:
         ("subtraction", "arithmetic"),
         ("division", "arithmetic"),
         ("differential", "differential"),
-        ("integration", "integration"),
+        # ("integration", "integration"),
         ("exponent", "exponent"),
     ]
     VARIABLES = ["x", "y", "z", "beta", "gamma"]
@@ -319,7 +324,7 @@ if __name__ == "__main__":
     eqs = sg.generate_solution_dataset(
         ops_sol=(3, 5),
         ops_eq=(2, 5),
-        num_eqs=4,
+        num_eqs=2,
         vars=sg.VARIABLES,
         funcs=sg.DIFFERENTIAL_FUNCTIONS,
         ops=sg.OPERATIONS,
