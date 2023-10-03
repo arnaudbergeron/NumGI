@@ -2,24 +2,24 @@ from __future__ import annotations
 
 import random
 
-from NumGI.EquationTokenizer import defaultTokenizer
 from NumGI.EquationTokenizer import EquationTokenizer
 
 
 class DatasetTokenizer(EquationTokenizer):
-    """Class for tokenizing a dataset."""
+    """
+    A class for tokenizing datasets.
 
-    def __init__(self, x: list, y: list, useDefaultTokenizer=False, isSympy=False):
-        """Creates a DatasetTokenizer object. Which holds your tokenizer and data.
+    Args:
+        x (list): A list of input data.
+        y (list): A list of output data.
+        useDefaultTokenizer (bool, optional): Whether to use the default tokenizer.
+          Defaults to False.
+        isSympy (bool, optional): Whether the input data is in SymPy format or sympy-list format.
+          Defaults to True.
+    """
 
-        Args:
-            x (list): Either a list of sympy equations or a list of sympy_to_list equations.
-            y (list): Either a list of sympy solutions or a list of sympy_to_list solutions
-            useDefaultTokenizer (bool, optional): If you want to use the default tokenizer.
-              Normally used when creating a Dataset that you wish to save.
-              Defaults to False.
-        """
-        super().__init__()
+    def __init__(self, x, y, useDefaultTokenizer=False, isSympy=True):
+        super().__init__(useDefaultTokenizer=useDefaultTokenizer)
 
         # shuffle lists
         temp = list(zip(x, y))
@@ -27,21 +27,15 @@ class DatasetTokenizer(EquationTokenizer):
         x, y = zip(*temp)
         x, y = list(x), list(y)
 
-        if isinstance(x[0], list):
-            self.x = x
-            self.y = y
-
-        else:
+        if isSympy:
             self.x = [self.sympy_to_list(i) for i in x]
             self.y = [self.sympy_to_list(i) for i in y]
 
-        if useDefaultTokenizer:
-            print("Using default tokenizer.")
-            self.tokenize_dict, self.decode_dict, self.tokenize, self.decode = defaultTokenizer()
-            self.dict_size = len(self.tokenize_dict)
-            self.char_set = set(self.tokenize_dict.keys())
-
         else:
+            self.x = x
+            self.y = y
+
+        if not useDefaultTokenizer:
             self.char_set = self.create_set_char()
             self.create_tokenizer(self.char_set)
 
@@ -49,8 +43,10 @@ class DatasetTokenizer(EquationTokenizer):
         self.y_tokenized = [self.tokenize(i) for i in self.y]
 
         self.x_tokenized = self.tensorize_and_pad(self.x_tokenized)
-        self.max_length = self.x_tokenized.shape[1]
-        self.y_tokenized = self.tensorize_and_pad_by_len(self.y_tokenized, self.max_length)
+        self.max_length_x = self.x_tokenized.shape[1]
+
+        self.y_tokenized = self.tensorize_and_pad(self.y_tokenized)
+        self.max_length_y = self.y_tokenized.shape[1]
 
     def create_set_char(self):
         char_list_x = [j for i in self.x for j in i]

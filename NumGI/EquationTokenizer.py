@@ -24,6 +24,12 @@ class EquationTokenizer:
         self.tokenizer_dict = None
         self.decode_dict = None
 
+        if useDefaultTokenizer:
+            print("Using default tokenizer.")
+            self.tokenize_dict, self.decode_dict, self.tokenize, self.decode = defaultTokenizer()
+            self.dict_size = len(self.tokenize_dict)
+            self.char_set = set(self.tokenize_dict.keys())
+
     def sympy_to_list(self, sympy_equation) -> list:
         """Converts a sympy equation to a list that will be tokenized.
 
@@ -220,17 +226,6 @@ class EquationTokenizer:
 
         return output[:-1]
 
-    def tensor_to_sympy(self, tensor: torch.tensor) -> list:
-        """Converts a tensor to a sympy equation.
-
-        Args:
-            tensor (torch.tensor): tensor to convert.
-
-        Returns:
-            list: list of converted sympy equations.
-        """
-        return [self.tokens_to_sympy(i) for i in tensor.tolist()]
-
 
 def defaultTokenizer():
     """Returns a default tokenizer. Because of issues with pickling."""
@@ -291,6 +286,14 @@ def defaultTokenizer():
         sp.sinh: 53,
         sp.acoth: 54,
         sp.sec: 55,
+        sp.Symbol("beta"): 56,
+        sp.Symbol("gamma"): 57,
+        sp.Symbol("delta"): 58,
+        sp.Symbol("a"): 59,
+        sp.Symbol("b"): 60,
+        sp.Symbol("c"): 61,
+        sp.Symbol("d"): 62,
+        sp.Symbol("epsilon"): 63,
     }
 
     # invert tokenizer_dict into decode_dict
