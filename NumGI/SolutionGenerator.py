@@ -170,6 +170,7 @@ class SolutionGenerator:
                 op = self.choose_operation(ops)
             level = random.randint(0, levels)
             old_node = random.choice(tree.get_nodes_at_level(level))
+            assert old_node.level == level
             new_node = self.EquationTree.Node(op, None, None, level)
             node_left = self.create_node_from_op(op, None, None, level)
             new_level = tree.insert(old_node, new_node, node_left)
@@ -250,6 +251,7 @@ class SolutionGenerator:
 
             def insert(self, node_new, node_left):
                 node_new.right = self
+                node_new.parent = self.parent
                 if self.parent is not None:
                     if self.is_left_child:
                         self.parent.left = node_new
@@ -330,7 +332,7 @@ class SolutionGenerator:
         ("subtraction", "arithmetic"),
         ("division", "arithmetic"),
         ("differential", "differential"),
-        ("integration", "integration"),
+        # ("integration", "integration"),
         ("exponent", "exponent"),
     ]
     VARIABLES = ["x", "y", "z", "beta", "gamma"]
@@ -341,7 +343,7 @@ if __name__ == "__main__":
     eqs = sg.generate_solution_dataset(
         ops_sol=(3, 5),
         ops_eq=(2, 5),
-        num_eqs=10,
+        num_eqs=1000,
         vars=sg.VARIABLES,
         funcs=sg.DIFFERENTIAL_FUNCTIONS,
         ops=sg.OPERATIONS,
