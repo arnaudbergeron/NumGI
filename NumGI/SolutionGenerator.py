@@ -224,6 +224,10 @@ class SolutionGenerator:
                 self.root = node_new
             return self.level
 
+        def __str__(self):
+            """Generates a string representation of the tree."""
+            return self.root.__str__()
+
         class Node:
             """Node for equation tree."""
 
@@ -272,6 +276,16 @@ class SolutionGenerator:
                 if self.right:
                     lvl_right = self.right.update_level(level + 1)
                 return max(self.level, max(lvl_left, lvl_right))
+
+            def __str__(self):
+                """Generates a string representation of the tree."""
+                ret = "\t" * self.level + repr(self.op) + "\n"
+                if self.left is not None:
+                    ret += self.left.__str__()
+                if self.right is not None:
+                    ret += self.right.__str__()
+
+                return ret
 
     def choose_op_noarithmetic(self, ops: list):
         return random.choice(ops[3:])
