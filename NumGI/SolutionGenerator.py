@@ -25,10 +25,15 @@ class SolutionGenerator:
         """Call to generate dataset of equations."""
         dataset = []
         for _ in range(num_eqs):
-            for i in range(ops_sol[0], ops_sol[1]):
-                sol, used_vars = self.generate_solution(i, vars, funcs, ops)
-                equation = self.generate_equation(used_vars, ops_eq, ops, sol)
-                dataset.append((sol, equation))
+            # if _ % 1_0 == 0:
+            #     print(f"Generating equation {_} of {num_eqs}")
+            num_ops_sol = random.randint(ops_sol[0], ops_sol[1])
+            sol, used_vars = self.generate_solution(num_ops_sol, vars, funcs, ops)
+            equation = self.generate_equation(used_vars, ops_eq, ops, sol)
+
+            func_sol = sp.Function("f")(*[sp.Symbol(var) for var in used_vars])
+            sol_eq = sp.Eq(func_sol, sol)
+            dataset.append((sol_eq, equation))
         return dataset
 
     def generate_equation(self, used_vars, ops_eqs, ops, sol):
@@ -125,8 +130,9 @@ class SolutionGenerator:
         func = sp.Function("f")(*vars)
         try:
             expression = self.tree_to_eq_helper(root, sol, used_vars)
-            equation = sp.Eq(expression, expression.doit())
-            equation.replace(expression, func)
+            rhs = expression.doit()
+            equation = sp.Eq(expression, rhs)
+            equation = equation.replace(sol, func)
         except ValueError:
             print(expression)
         return equation
@@ -207,8 +213,8 @@ class SolutionGenerator:
                     # TODO: add dummy values so that symbols can be recognized
                     if node.op[1] != "number" and node.op[1] != "symbol":
                         nodes_at_level.append(node)
-                    else:
-                        print(node.op)
+                    # else:
+                    #     print(node.op)
 
                 if lvl > level:
                     return nodes_at_level
