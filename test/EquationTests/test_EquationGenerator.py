@@ -24,13 +24,13 @@ def test_insert_tree(
     assert tree.root.right.level == 1
     assert tree.root.left.level == 1
     assert tree.level == 1
+
+    old_node = tree.get_nodes_at_level(1)[0]
     tree.insert(
-        tree.get_nodes_at_level(1),
+        old_node,
         SolutionGenerator.EquationTree.Node(("integration", "integration"), None, None, 1),
         SolutionGenerator.EquationTree.Node(("symbol", "symbol"), None, None, 2),
     )
     assert tree.level == 2
     assert tree.root.right.right.level == 2
     assert tree.root.right.left.level == 2
-    assert tree.root.left.right.level == 2
-    assert tree.root.left.left.level == 2

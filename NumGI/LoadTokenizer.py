@@ -13,7 +13,7 @@ class LoadTokenizer(DatasetTokenizer):
         default_tokenized_y = []
 
         temp_data = [["1", "2"]]
-        tempTokenizer = DatasetTokenizer(temp_data, temp_data, True)
+        tempTokenizer = DatasetTokenizer(temp_data, temp_data, True, False)
 
         # load files
         max_length = 0
@@ -35,4 +35,4 @@ class LoadTokenizer(DatasetTokenizer):
         new_x = [tempTokenizer.tokens_to_list(i) for i in default_combined_x_torch.tolist()]
         new_y = [tempTokenizer.tokens_to_list(i) for i in default_combined_y_torch.tolist()]
 
-        super().__init__(new_x, new_y, False)
+        super().__init__(new_x, new_y, False, False)
