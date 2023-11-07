@@ -1,22 +1,23 @@
-from EquationTokenizer import EquationTokenizer, defaultTokenizer
-from DatasetTokenizer import DatasetTokenizer
+from __future__ import annotations
+
 import torch
 
-class LoadTokenizer(DatasetTokenizer):
-    """This is the tokenizer used when loading data from files.
+from NumGI.DatasetTokenizer import DatasetTokenizer
 
-    Args:
-        DatasetTokenizer (_type_): _description_
-    """
+
+class LoadTokenizer(DatasetTokenizer):
+    """The tokenizer used when loading data from files."""
+
     def __init__(self, x_files, y_files):
         default_tokenized_x = []
         default_tokenized_y = []
 
-        tempTokenizer = DatasetTokenizer([['1','2']], [['1','2']], True)
+        temp_data = [["1", "2"]]
+        tempTokenizer = DatasetTokenizer(temp_data, temp_data, True, False)
 
-        #load files
+        # load files
         max_length = 0
-        for (x_file, y_file) in zip(x_files, y_files):
+        for x_file, y_file in zip(x_files, y_files):
             _torch_x = torch.load(x_file)
             _torch_y = torch.load(y_file)
             default_tokenized_x.append(_torch_x)
@@ -28,13 +29,10 @@ class LoadTokenizer(DatasetTokenizer):
             default_tokenized_x[idx] = tempTokenizer.tensorize_and_pad_by_len(x, max_length)
             default_tokenized_y[idx] = tempTokenizer.tensorize_and_pad_by_len(y, max_length)
 
-        default_combined_x_torch = torch.cat(default_tokenized_x,axis=0)
-        default_combined_y_torch = torch.cat(default_tokenized_x,axis=0)
+        default_combined_x_torch = torch.cat(default_tokenized_x, axis=0)
+        default_combined_y_torch = torch.cat(default_tokenized_y, axis=0)
 
         new_x = [tempTokenizer.tokens_to_list(i) for i in default_combined_x_torch.tolist()]
         new_y = [tempTokenizer.tokens_to_list(i) for i in default_combined_y_torch.tolist()]
 
-        super().__init__(new_x, new_y, False)
-
-        
-        
+        super().__init__(new_x, new_y, False, False)

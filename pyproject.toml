@@ -9,7 +9,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 authors = [{ name = "Arnaud Bergeron", email = "bergerona62@gmail.com" }]
 dynamic = ["version"]
-dependencies = ["sympy", "torch", "Numba"]
+dependencies = ["sympy", "torch", "Numba", "pytest", "coverage", "pandas"]
 
 
 

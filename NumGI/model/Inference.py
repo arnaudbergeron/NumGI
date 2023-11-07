@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import torch
 
+from NumGI.EquationTokenizer import EquationTokenizer
+
 
 def batch_inference(
-    input_seqs: torch.tensor, model: torch.nn, start_id: int, pad_id: int, end_id: int
+    input_seqs: torch.tensor, model: torch.nn, tokenize_dict: EquationTokenizer
 ) -> torch.tensor:
     """Performs Batch Inference on a list of input sequences.
 
@@ -18,20 +20,35 @@ def batch_inference(
     Returns:
         torch.tensor: Output Solution(s) to solved by the model
     """
-    model = model.to("cpu")
-    model.tgt_mask = model.tgt_mask.to("cpu")
+    start_id = tokenize_dict["START"]
+    pad_id = tokenize_dict["PAD"]
+    end_id = tokenize_dict["END"]
+
     model.eval()
     with torch.no_grad():
         mask_in = input_seqs == pad_id
-        out = torch.full(input_seqs.shape, pad_id)
-        out[:][0] = start_id
+        in_shape = list(input_seqs.shape)
+        in_shape[1] = in_shape[1] - 1
+
+        out = torch.full(in_shape, pad_id)
+        out[:, 0] = start_id
+        has_end = torch.zeros(input_seqs.shape[0], dtype=torch.bool)
+
         for i in range(1, out.shape[1]):
             mask_out = out == pad_id
             output = model(input_seqs, out, mask_in, mask_out)
             output = output.exp()
-            out[:][i] = torch.multinomial(output[i - 1, :, :], 1, replacement=False)
 
-            if torch.sum(out[:][i] != end_id) == 0:
+            # Sample tokens for all sequences in parallel
+            sampled_tokens = torch.multinomial(output[i - 1, :, :], 1, replacement=False)
+
+            # Update the generated sequence
+            out[:, i] = sampled_tokens.squeeze()
+
+            has_end = has_end | (sampled_tokens == end_id).squeeze()
+
+            # Check if all sequences have ended
+            if has_end.all():
                 break
 
     return out
