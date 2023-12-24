@@ -52,5 +52,7 @@ coverage.xml
 *.log
 *.pot
 
+.vscode
+
 # Sphinx documentation
 docs/_build/
