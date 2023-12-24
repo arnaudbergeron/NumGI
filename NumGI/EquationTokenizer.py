@@ -7,6 +7,8 @@ from sympy.core.numbers import Integer
 from sympy.core.numbers import Rational
 from torch.nn.utils.rnn import pad_sequence
 
+from NumGI.ConstantDictionaries import DEFAULT_DICT
+
 
 class EquationTokenizer:
     """Tokenizer for equations.
@@ -239,72 +241,7 @@ class EquationTokenizer:
 
 def defaultTokenizer():
     """Returns a default tokenizer. Because of issues with pickling."""
-    tokenize_dict = {
-        ")": 0,
-        sp.acsc: 1,
-        sp.acot: 2,
-        sp.asech: 3,
-        sp.core.containers.Tuple: 4,
-        "/": 5,
-        sp.sech: 6,
-        "END": 7,
-        sp.exp: 8,
-        "7": 9,
-        "0": 10,
-        sp.asin: 11,
-        "5": 12,
-        sp.core.function.Derivative: 13,
-        "8": 14,
-        sp.asec: 15,
-        sp.core.add.Add: 16,
-        sp.core.power.Pow: 17,
-        sp.csch: 18,
-        "START": 19,
-        sp.csc: 20,
-        "PAD": 21,
-        sp.sin: 22,
-        ",": 23,
-        sp.acsch: 24,
-        sp.core.relational.Equality: 25,
-        "(": 26,
-        "2": 27,
-        sp.Symbol("x"): 28,
-        sp.coth: 29,
-        sp.Symbol("y"): 30,
-        sp.log: 31,
-        sp.cos: 32,
-        "6": 33,
-        sp.core.mul.Mul: 34,
-        sp.acos: 35,
-        "9": 36,
-        sp.Function("f"): 37,
-        "-": 38,
-        sp.sqrt: 39,
-        sp.cosh: 40,
-        sp.tan: 41,
-        sp.tanh: 42,
-        sp.Symbol("z"): 43,
-        "4": 44,
-        "3": 45,
-        sp.cot: 46,
-        sp.asinh: 47,
-        sp.atan: 48,
-        sp.acosh: 49,
-        "1": 50,
-        sp.atanh: 51,
-        ".": 52,
-        sp.sinh: 53,
-        sp.acoth: 54,
-        sp.sec: 55,
-        sp.Symbol("beta"): 56,
-        sp.Symbol("gamma"): 57,
-        sp.Symbol("delta"): 58,
-        sp.Symbol("a"): 59,
-        sp.Symbol("b"): 60,
-        sp.Symbol("c"): 61,
-        sp.Symbol("d"): 62,
-        sp.Symbol("epsilon"): 63,
-    }
+    tokenize_dict = DEFAULT_DICT
 
     # invert tokenizer_dict into decode_dict
     decode_dict = {v: k for k, v in tokenize_dict.items()}
