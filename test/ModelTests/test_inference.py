@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import torch
 
-from NumGI.model.Inference import batch_inference
-from NumGI.model.Model import TransformerNet
+from NumGI.Model.Inference import batch_inference
+from NumGI.Model.Model import TransformerNet
 
 
 def test_batch_inference():

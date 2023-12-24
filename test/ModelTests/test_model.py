@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import torch
 
-from NumGI.model.Model import TransformerNet
+from NumGI.Model.Model import TransformerNet
 
 
 def test_transformer_net():
