@@ -7,8 +7,6 @@ from sympy.core.numbers import Integer
 from sympy.core.numbers import Rational
 from torch.nn.utils.rnn import pad_sequence
 
-from NumGI.ConstantDictionaries import SP_TO_NP
-
 
 class EquationTokenizer:
     """Tokenizer for equations.
@@ -70,44 +68,12 @@ class EquationTokenizer:
 
         return eq_list
 
-    def _utils_exec_numpy(self, sympy_list, **kwargs):
-        """Converts a sympy list to a numpy list.
-
-        This is a util func.
-        """
-        function = sympy_list[0]
-        numpy_function = SP_TO_NP[function]
-        args_list = []
-        for i in sympy_list[1:]:
-            if isinstance(i, list):
-                args_list.append(self._utils_exec_numpy(i, **kwargs))
-            elif isinstance(i, sp.Symbol):
-                args_list.append(kwargs[str(i)])
-            elif self.is_number(i):
-                args_list.append(i.evalf())
-            else:
-                raise ValueError(f"Unknown type: {type(i)}, for {i}")
-
-        return numpy_function(*args_list)
-
     def sympy_to_numpy(self, sympy_equation):
         """Converts a sympy equation to a numpy function.
 
         This is a util func.
         """
-        simplified_eq = sympy_equation.rhs.simplify()
-
-        return sp.lambdify(list(simplified_eq.free_symbols), simplified_eq, "numpy")
-        # sympy_list = self.sympy_to_list(simplified_eq)
-        # grouped_num_list = self._regroup_numbers(sympy_list)
-        # parsed_list = self._parantheses_to_list(grouped_num_list)[0][0]
-
-        # variables = list(sympy_equation.free_symbols)
-        # variables = [str(i) for i in variables]
-        # def np_func(**kwargs):
-        #     return self._utils_exec_numpy(parsed_list, **kwargs)
-
-        # return np_func, variables
+        return sp.lambdify(list(sympy_equation.free_symbols), sympy_equation, "numpy")
 
     def _parantheses_to_list(self, eq_list):
         """Converts a list with parentheses to a list of lists according to parentheses.
