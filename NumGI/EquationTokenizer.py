@@ -7,6 +7,8 @@ from sympy.core.numbers import Integer
 from sympy.core.numbers import Rational
 from torch.nn.utils.rnn import pad_sequence
 
+from NumGI.ConstantDictionaries import DEFAULT_DICT
+
 
 class EquationTokenizer:
     """Tokenizer for equations.
@@ -53,11 +55,7 @@ class EquationTokenizer:
         for ind, arg in enumerate(eq_args):
             sub_arg_list = self.sympy_to_list(arg)
             for _sub in sub_arg_list:
-                if (
-                    isinstance(_sub, Float)
-                    or isinstance(_sub, Integer)
-                    or isinstance(_sub, Rational)
-                ):
+                if self.is_number(_sub):
                     # perhaps not general enough should allow for more types
                     # the idea is we want to tokenize '12.2' as '1','2,'.','2' and not '12.2'
                     for i in str(_sub):
@@ -71,6 +69,13 @@ class EquationTokenizer:
         eq_list.append(")")
 
         return eq_list
+
+    def sympy_to_numpy(self, sympy_equation):
+        """Converts a sympy equation to a numpy function.
+
+        This is a util func.
+        """
+        return sp.lambdify(list(sympy_equation.free_symbols), sympy_equation, "numpy")
 
     def _parantheses_to_list(self, eq_list):
         """Converts a list with parentheses to a list of lists according to parentheses.
@@ -226,75 +231,17 @@ class EquationTokenizer:
 
         return output[:-1]
 
+    def is_number(self, sp_class):
+        return (
+            isinstance(sp_class, Float)
+            or isinstance(sp_class, Integer)
+            or isinstance(sp_class, Rational)
+        )
+
 
 def defaultTokenizer():
     """Returns a default tokenizer. Because of issues with pickling."""
-    tokenize_dict = {
-        ")": 0,
-        sp.acsc: 1,
-        sp.acot: 2,
-        sp.asech: 3,
-        sp.core.containers.Tuple: 4,
-        "/": 5,
-        sp.sech: 6,
-        "END": 7,
-        sp.exp: 8,
-        "7": 9,
-        "0": 10,
-        sp.asin: 11,
-        "5": 12,
-        sp.core.function.Derivative: 13,
-        "8": 14,
-        sp.asec: 15,
-        sp.core.add.Add: 16,
-        sp.core.power.Pow: 17,
-        sp.csch: 18,
-        "START": 19,
-        sp.csc: 20,
-        "PAD": 21,
-        sp.sin: 22,
-        ",": 23,
-        sp.acsch: 24,
-        sp.core.relational.Equality: 25,
-        "(": 26,
-        "2": 27,
-        sp.Symbol("x"): 28,
-        sp.coth: 29,
-        sp.Symbol("y"): 30,
-        sp.log: 31,
-        sp.cos: 32,
-        "6": 33,
-        sp.core.mul.Mul: 34,
-        sp.acos: 35,
-        "9": 36,
-        sp.Function("f"): 37,
-        "-": 38,
-        sp.sqrt: 39,
-        sp.cosh: 40,
-        sp.tan: 41,
-        sp.tanh: 42,
-        sp.Symbol("z"): 43,
-        "4": 44,
-        "3": 45,
-        sp.cot: 46,
-        sp.asinh: 47,
-        sp.atan: 48,
-        sp.acosh: 49,
-        "1": 50,
-        sp.atanh: 51,
-        ".": 52,
-        sp.sinh: 53,
-        sp.acoth: 54,
-        sp.sec: 55,
-        sp.Symbol("beta"): 56,
-        sp.Symbol("gamma"): 57,
-        sp.Symbol("delta"): 58,
-        sp.Symbol("a"): 59,
-        sp.Symbol("b"): 60,
-        sp.Symbol("c"): 61,
-        sp.Symbol("d"): 62,
-        sp.Symbol("epsilon"): 63,
-    }
+    tokenize_dict = DEFAULT_DICT
 
     # invert tokenizer_dict into decode_dict
     decode_dict = {v: k for k, v in tokenize_dict.items()}

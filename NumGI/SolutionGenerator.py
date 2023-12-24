@@ -4,6 +4,10 @@ import random
 
 import sympy as sp
 
+from NumGI.ConstantDictionaries import DIFFERENTIAL_FUNCTIONS
+from NumGI.ConstantDictionaries import OPERATIONS
+from NumGI.ConstantDictionaries import VARIABLES
+
 
 class SolutionGenerator:
     """Generates solutions for contrived questions to be used for training data.
@@ -14,6 +18,9 @@ class SolutionGenerator:
     def __init__(
         self,
     ):
+        self.OPERATIONS = OPERATIONS
+        self.DIFFERENTIAL_FUNCTIONS = DIFFERENTIAL_FUNCTIONS
+        self.VARIABLES = VARIABLES
         self.PROB_NEW_SYMBOL = 0.3
         self.PROB_USED_SYMBOL = 1 - self.PROB_NEW_SYMBOL
         self.NEW_VARS = self.VARIABLES
@@ -301,48 +308,6 @@ class SolutionGenerator:
     def choose_op_noarithmetic(self, ops: list):
         return random.choice(ops[3:])
 
-    DIFFERENTIAL_FUNCTIONS = [
-        sp.sin,
-        sp.cos,
-        sp.tan,
-        sp.cot,
-        sp.sec,
-        sp.csc,
-        sp.exp,
-        sp.log,
-        sp.sqrt,
-        sp.asin,
-        sp.acos,
-        sp.atan,
-        sp.acot,
-        sp.asec,
-        sp.acsc,
-        sp.sinh,
-        sp.cosh,
-        sp.tanh,
-        sp.coth,
-        sp.sech,
-        sp.csch,
-        sp.asinh,
-        sp.acosh,
-        sp.atanh,
-        sp.acoth,
-        sp.asech,
-        sp.acsch,
-    ]
-    # must not be rordered need first three to be arithmetic because
-    #  I am lazy and chooseop_noarithmetic is not implemented well
-    OPERATIONS = [
-        ("multiplication", "arithmetic"),
-        ("addition", "arithmetic"),
-        ("subtraction", "arithmetic"),
-        ("division", "arithmetic"),
-        ("differential", "differential"),
-        # ("integration", "integration"),
-        ("exponent", "exponent"),
-    ]
-    VARIABLES = ["x", "y", "z", "beta", "gamma"]
-
 
 if __name__ == "__main__":
     sg = SolutionGenerator()
@@ -350,8 +315,8 @@ if __name__ == "__main__":
         ops_sol=(3, 5),
         ops_eq=(2, 5),
         num_eqs=1000,
-        vars=sg.VARIABLES,
-        funcs=sg.DIFFERENTIAL_FUNCTIONS,
-        ops=sg.OPERATIONS,
+        vars=VARIABLES,
+        funcs=DIFFERENTIAL_FUNCTIONS,
+        ops=OPERATIONS,
     )
     print(eqs)

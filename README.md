@@ -1,6 +1,7 @@
-![logo_banner](https://github.com/arnaudbergeron/NumGI/assets/58529583/4b700c9f-b58f-4448-af5d-50b637cd9d86)
+![logo_banner_3](https://github.com/arnaudbergeron/NumGI/assets/58529583/c23ba24c-5686-495b-89bb-1c3139290f9d)
 
 -----------------
+
 # NumGI - Differential Equation Solver using Transformer-based AI
 NumGI is an open-source project that aims to solve differential equations using transformer-based AI models. It provides a user-friendly interface for solving a wide range of ordinary and partial differential equations.
 
