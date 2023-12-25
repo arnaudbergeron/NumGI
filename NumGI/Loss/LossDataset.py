@@ -46,7 +46,7 @@ class LossDataset:
 
         possible_symbols = [i for i in possible_symbols if len(self.var_dict[i]) > 1]
 
-        first_batch = int(0.9 * N)
+        first_batch = int(0.95 * N)
         second_batch = N - first_batch
         for i in range(first_batch):
             print(i)
@@ -59,7 +59,6 @@ class LossDataset:
             sol_sympy_2 = [self.solutions[idx_sympy_2], idx_sympy_2]
 
             integrand = sp.Abs(sol_sympy_1[0].rhs - sol_sympy_2[0].rhs) ** ell_norm
-            print(integrand)
             integral = self.compute_integral(integrand)
 
             loss[0, i] = sol_sympy_1[1]

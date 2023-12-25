@@ -22,6 +22,22 @@ SP_TO_TORCH = {
     sp.Add: torch.add,
     sp.Pow: torch.pow,
     sp.Abs: torch.abs,
+    sp.cot: lambda x: torch.divide(1, torch.tan(x)),
+    sp.acot: lambda x: torch.atan(torch.divide(1, x)),
+    sp.sec: lambda x: torch.divide(1, torch.cos(x)),
+    sp.asec: lambda x: torch.acos(torch.divide(1, x)),
+    sp.csc: lambda x: torch.divide(1, torch.sin(x)),
+    sp.acsc: lambda x: torch.asin(torch.divide(1, x)),
+    sp.coth: lambda x: torch.divide(1, torch.tanh(x)),
+    sp.acoth: lambda x: torch.atanh(torch.divide(1, x)),
+    sp.sech: lambda x: torch.divide(1, torch.cosh(x)),
+    sp.asech: lambda x: torch.log(
+        torch.add(torch.divide(1, x), torch.sqrt(torch.sub(torch.pow(torch.divide(1, x), 2), 1)))
+    ),
+    sp.csch: lambda x: torch.divide(1, torch.sinh(x)),
+    sp.acsch: lambda x: torch.log(
+        torch.add(torch.divide(1, x), torch.sqrt(torch.add(torch.pow(torch.divide(1, x), 2), 1)))
+    ),
 }
 
 DIFFERENTIAL_FUNCTIONS = [
@@ -39,6 +55,18 @@ DIFFERENTIAL_FUNCTIONS = [
     sp.asinh,
     sp.acosh,
     sp.atanh,
+    sp.cot,
+    sp.acot,
+    sp.sec,
+    sp.asec,
+    sp.csc,
+    sp.acsc,
+    sp.coth,
+    sp.acoth,
+    sp.sech,
+    sp.asech,
+    sp.csch,
+    sp.acsch,
 ]
 
 OPERATIONS = [
