@@ -8,6 +8,7 @@ from sympy.core.numbers import Rational
 from torch.nn.utils.rnn import pad_sequence
 
 from NumGI.ConstantDictionaries import DEFAULT_DICT
+from NumGI.ConstantDictionaries import SP_TO_TORCH
 
 
 class EquationTokenizer:
@@ -31,6 +32,13 @@ class EquationTokenizer:
             self.tokenize_dict, self.decode_dict, self.tokenize, self.decode = defaultTokenizer()
             self.dict_size = len(self.tokenize_dict)
             self.char_set = set(self.tokenize_dict.keys())
+
+        if torch.cuda.is_available():
+            self.device = "cuda"
+        elif torch.backends.mps.is_available():
+            self.device = "mps"
+        else:
+            self.device = "cpu"
 
     def sympy_to_list(self, sympy_equation) -> list:
         """Converts a sympy equation to a list that will be tokenized.
@@ -75,7 +83,59 @@ class EquationTokenizer:
 
         This is a util func.
         """
-        return sp.lambdify(list(sympy_equation.free_symbols), sympy_equation, "numpy")
+        symbols = list(sympy_equation.free_symbols)
+        return sp.lambdify(symbols, sympy_equation, "numpy"), symbols
+
+    def sympy_to_torch(self, sympy_equation):
+        """Converts a sympy equation to a pytorch function.
+
+        This is a util func.
+        """
+        # simplified_eq = sympy_equation.simplify()
+        simplified_eq = sympy_equation
+        sympy_list = self.sympy_to_list(simplified_eq)
+        grouped_num_list = self._regroup_numbers(sympy_list)
+        parsed_list = self._parantheses_to_list(grouped_num_list)[0][0]
+
+        variables = list(simplified_eq.free_symbols)
+        variables = [str(i) for i in variables]
+
+        def torch_func(**kwargs):
+            return self._utils_exec_torch(parsed_list, **kwargs)
+
+        return torch_func, variables
+
+    def _utils_exec_torch(self, sympy_list, **kwargs):
+        """Converts a sympy list to a torch function.
+
+        This is a util func.
+        """
+        function = sympy_list[0]
+        torch_function = SP_TO_TORCH[function]
+        args_list = []
+        for i in sympy_list[1:]:
+            if isinstance(i, list):
+                args_list.append(self._utils_exec_torch(i, **kwargs))
+            elif isinstance(i, sp.Symbol):
+                args_list.append(kwargs[str(i)])
+            elif self.is_number(i):
+                args_list.append(torch.tensor(float(i), device=self.device))
+            elif i == sp.core.numbers.Pi:
+                args_list.append(torch.tensor(torch.pi, device=self.device))
+            else:
+                raise ValueError(f"Unknown type: {type(i)}, for {i}")
+
+        if len(args_list) > 2 and (function == sp.Add or function == sp.Mul):
+            return self.call_multi_input_torch(torch_function, args_list)
+
+        else:
+            return torch_function(*args_list)
+
+    def call_multi_input_torch(self, func, args):
+        if len(args) > 2:
+            return func(args[0], self.call_multi_input_torch(func, args[1:]))
+        else:
+            return func(args[0], args[1])
 
     def _parantheses_to_list(self, eq_list):
         """Converts a list with parentheses to a list of lists according to parentheses.
@@ -213,8 +273,7 @@ class EquationTokenizer:
         """Takes in a list of tokenized lists and outputs a padded tensor of tensors."""
         pad_val = self.tokenize_dict["PAD"]
 
-        list_of_token_list = [torch.tensor(i) for i in list_of_token_list]
-
+        list_of_token_list = [torch.tensor(i, device=self.device) for i in list_of_token_list]
         output = pad_sequence(list_of_token_list, batch_first=True, padding_value=pad_val)
 
         return output
@@ -222,14 +281,23 @@ class EquationTokenizer:
     def tensorize_and_pad_by_len(self, list_of_token_list, max_len):
         """Takes in a list of tokenized lists and outputs a padded tensor of defined length."""
         pad_val = self.tokenize_dict["PAD"]
+        list_of_token_list = [torch.tensor(i, device=self.device) for i in list_of_token_list]
 
-        list_of_token_list = [torch.tensor(i) for i in list_of_token_list]
-        _extra = torch.zeros(max_len)
+        return self._pad_tensors(list_of_token_list, max_len, pad_val)
+
+    def pad_by_len(self, list_of_token_list, max_len):
+        """Takes in a list of tokenized lists and outputs a padded tensor of defined length."""
+        pad_val = self.tokenize_dict["PAD"]
+        list_of_token_list = [i.to(self.device) for i in list_of_token_list]
+
+        return self._pad_tensors(list_of_token_list, max_len, pad_val)
+
+    def _pad_tensors(self, list_of_token_list, max_len, pad_val):
+        _extra = torch.zeros(max_len, device=self.device)
         list_of_token_list.append(_extra)
 
         output = pad_sequence(list_of_token_list, batch_first=True, padding_value=pad_val)
-
-        return output[:-1]
+        return output[torch.max((output != _extra), axis=1).values]
 
     def is_number(self, sp_class):
         return (

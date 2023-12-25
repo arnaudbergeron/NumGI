@@ -6,6 +6,8 @@ import os
 import sympy as sp
 import torch
 
+from NumGI.ConstantDictionaries import DIFFERENTIAL_FUNCTIONS
+from NumGI.ConstantDictionaries import OPERATIONS
 from NumGI.DatasetTokenizer import DatasetTokenizer
 from NumGI.EquationTokenizer import EquationTokenizer
 from NumGI.SolutionGenerator import SolutionGenerator
@@ -70,43 +72,8 @@ def generate_eq_parallel(gen_args: list, path: str, num_thousands: int):
 
 
 if __name__ == "__main__":
-    diff_func = [
-        sp.sin,
-        sp.cos,
-        sp.tan,
-        sp.cot,
-        sp.sec,
-        sp.csc,
-        sp.exp,
-        sp.log,
-        sp.sqrt,
-        sp.asin,
-        sp.acos,
-        sp.atan,
-        sp.acot,
-        sp.asec,
-        sp.acsc,
-        sp.sinh,
-        sp.cosh,
-        sp.tanh,
-        sp.coth,
-        sp.sech,
-        sp.csch,
-        sp.asinh,
-        sp.acosh,
-        sp.atanh,
-        sp.acoth,
-        sp.asech,
-        sp.acsch,
-    ]
-    ops = [
-        ("multiplication", "arithmetic"),
-        ("addition", "arithmetic"),
-        ("subtraction", "arithmetic"),
-        ("division", "arithmetic"),
-        ("differential", "differential"),
-        ("exponent", "exponent"),
-    ]
+    diff_func = DIFFERENTIAL_FUNCTIONS
+    ops = OPERATIONS
     vars = ["x", "y", "z", "beta", "gamma", "delta", "a", "b", "c", "d", "epsilon"]
     gen_args = [
         (3, 10),
