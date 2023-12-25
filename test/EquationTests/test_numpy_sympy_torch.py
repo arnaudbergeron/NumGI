@@ -7,6 +7,7 @@ import sympy as sp
 import torch
 
 from NumGI.ConstantDictionaries import DIFFERENTIAL_FUNCTIONS
+from NumGI.ConstantDictionaries import OPERATIONS
 from NumGI.EquationTokenizer import EquationTokenizer
 from NumGI.SolutionGenerator import SolutionGenerator
 
@@ -16,8 +17,8 @@ def test_sp_np_torch():
     sg.PROB_NEW_SYMBOL = 0
     n_eqs = 30
     sols = [
-        # sg.generate_solution(4, ["x"], DIFFERENTIAL_FUNCTIONS, OPERATIONS)[0].simplify()
-        # for i in range(n_eqs)
+        sg.generate_solution(4, ["x"], DIFFERENTIAL_FUNCTIONS, OPERATIONS)[0].simplify()
+        for i in range(n_eqs)
     ]
 
     for func in DIFFERENTIAL_FUNCTIONS:

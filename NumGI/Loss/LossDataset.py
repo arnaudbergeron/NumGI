@@ -18,9 +18,9 @@ class LossDataset:
     def __init__(self, eq_dataset: DatasetTokenizer, N: int, ell_norm: int = 1):
         self.eq_dataset = eq_dataset
         self.grid_size = (100, 100, 1000)
+        self.max_integral_value = 10e10  # we can play with this value
         self.var_dict = self.create_var_dict()
         self.loss = self.calculate_n_pairwise_loss(N, ell_norm)
-        self.max_integral_value = 10e10  # we can play with this value
 
     def create_var_dict(self):
         """Creates a dictionary of different variables and their corresponding equations.
@@ -49,7 +49,6 @@ class LossDataset:
         first_batch = int(0.95 * N)
         second_batch = N - first_batch
         for i in range(first_batch):
-            print(i)
             chosen_symbols = random.choice(list(possible_symbols))
 
             possible_equations = {i[1] for i in self.var_dict[chosen_symbols]}
@@ -82,9 +81,10 @@ class LossDataset:
     def compute_integral(self, sympy_eq):
         func, symbols = self.eq_dataset.sympy_to_torch(sympy_eq)
         grids = self.create_discrete_grids(symbols)
-        print(grids[0])
         _arg = {sym: _grid for sym, _grid in zip(symbols, grids)}
-        return torch.mean(func(**_arg))
+        result = torch.mean(func(**_arg))
+        del grids
+        return result
 
     def create_discrete_grids(self, symbols):
         grid = torch.linspace(*self.grid_size, device=self.eq_dataset.device)
